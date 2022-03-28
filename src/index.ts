@@ -1,20 +1,4 @@
-import 'dotenv/config'
-import fastify from 'fastify'
-import pino from 'pino'
-import * as server from './config/server'
-import healthRoutes from './routes/health'
+import * as App from './app'
 
-const app = fastify({
-  logger: pino({ level: 'info' })
-})
-
-const serverConfig = server.getConfig()
-
-app.register(healthRoutes, { prefix: '/health' })
-
-app.listen(serverConfig.port, (err, _address) => {
-  if (err) {
-    app.log.error(err)
-    process.exit(1)
-  }
-})
+const app = App.create()
+App.start(app)
