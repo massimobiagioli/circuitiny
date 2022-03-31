@@ -15,7 +15,10 @@ export const DeviceEvent = Type.Object({
     address: Type.String({ format: 'ipv4' }),
     sketch: Type.String()
   }),
-  createdAt: Type.Integer()
+  createdAt: Type.Integer(),
+  metadata: Type.Optional(
+    Type.Array(Type.Record(Type.String(), Type.Unknown()))
+  )
 })
 
 export type DeviceEvent = Static<typeof DeviceEvent>
@@ -26,6 +29,5 @@ export const fromString = (raw: string): E.Either<Error, DeviceEvent> => {
   if (validate(data)) {
     return E.right(data as DeviceEvent)
   }
-
   return E.left(new Error(V.errorString(validate.errors)))
 }

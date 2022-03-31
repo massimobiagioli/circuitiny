@@ -11,6 +11,7 @@ interface DeviceEventDocument {
   eventType: string
   sender: DeviceDocument
   createdAt: number
+  metadata: [Map<string, unknown>]
 }
 
 const deviceSchema = new Schema<DeviceDocument>({
@@ -23,7 +24,13 @@ const deviceSchema = new Schema<DeviceDocument>({
 const deviceEventSchema = new Schema<DeviceEventDocument>({
   eventType: { type: String, required: true },
   sender: { type: deviceSchema, required: true },
-  createdAt: { type: Number, required: true }
+  createdAt: { type: Number, required: true },
+  metadata: [
+    {
+      type: Map,
+      of: Schema.Types.Mixed
+    }
+  ]
 })
 
 const DeviceEventMongooseModel = model<DeviceEventDocument>(

@@ -2,13 +2,21 @@ import 'dotenv/config'
 import fastify, { FastifyInstance } from 'fastify'
 import fastifyStatic from 'fastify-static'
 import path from 'path'
-import pino, { Logger } from 'pino'
+import pino from 'pino'
 import healthRoutes from './routes/health'
 import * as mqtt from 'mqtt'
 import * as ServerConfig from './config/server'
 import * as MqttConfig from './config/mqtt'
+import * as MongoDbConfig from './config/mongo'
+import * as deps from './config/deps'
+import { container } from 'tsyringe'
+import { connect } from 'mongoose'
+import HandleDeviceEventUseCase from './context/device/application/HandleDeviceEventUseCase'
+import * as O from 'fp-ts/lib/Option'
 
-const initMqtt = (logger: Logger) => {
+const logger = pino({ level: 'info' })
+
+const initMqtt = () => {
   const mqttClient: mqtt.MqttClient = mqtt.connect(MqttConfig.brokerUrl())
 
   mqttClient.on('connect', () => {
@@ -23,17 +31,32 @@ const initMqtt = (logger: Logger) => {
   })
 
   mqttClient.on('message', (topic, message) => {
-    logger.info(`Topic: ${topic}\nMessage: ${message}`)
     const device = topic.split('/')[1]
-    mqttClient.publish(`to-device/${device}`, 'ack')
-    logger.info(`Sent ack to ${device}`)
+    const handleDeviceEventUseCase = container.resolve(HandleDeviceEventUseCase)
+    handleDeviceEventUseCase.invoke({ device, rawEvent: message.toString() })
   })
 }
 
-export const create = (): FastifyInstance => {
-  const logger = pino({ level: 'info' })
+const startDbConnection = (): void => {
+  if (O.isNone(MongoDbConfig.url())) {
+    logger.error('No mongo url provided')
+    return
+  }
+  const getUrl = O.getOrElse(() => '')
+  const url = getUrl(MongoDbConfig.url())
+  connect(url)
+    .then(() => {
+      logger.info('Connected to mongodb')
+    })
+    .catch((err) => {
+      logger.error(err)
+    })
+}
 
-  initMqtt(logger)
+export const create = (): FastifyInstance => {
+  deps.init(logger)
+  initMqtt()
+  startDbConnection()
 
   const app = fastify({
     logger: logger

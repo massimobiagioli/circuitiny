@@ -1,7 +1,5 @@
-import DeviceEvent from './DeviceEvent'
+import { DeviceEvent } from './DeviceEvent'
 
-interface DeviceRepository {
+export default interface DeviceRepository {
   store(event: DeviceEvent): void
 }
-
-export default DeviceRepository
