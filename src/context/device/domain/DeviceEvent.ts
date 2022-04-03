@@ -23,9 +23,21 @@ export const DeviceEvent = Type.Object({
 
 export type DeviceEvent = Static<typeof DeviceEvent>
 
+const validate = V.compiler.compile(DeviceEvent)
+
+const parseRaw = (raw: string): unknown => {
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return undefined
+  }
+}
+
 export const fromString = (raw: string): E.Either<Error, DeviceEvent> => {
-  const validate = V.compiler.compile(DeviceEvent)
-  const data = JSON.parse(raw)
+  const data = parseRaw(raw)
+  if (data === undefined) {
+    return E.left(new Error('malformed input data'))
+  }
   if (validate(data)) {
     return E.right(data as DeviceEvent)
   }

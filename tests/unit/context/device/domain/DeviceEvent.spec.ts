@@ -39,4 +39,14 @@ describe('DeviceEvent', () => {
       expect(error.message).toBe('/sender/address must match format "ipv4"')
     }
   })
+
+  it('should return malformed input error', () => {
+    const result = DeviceEvent.fromString('malformed string')
+
+    expect(E.isLeft(result)).toBeTruthy()
+    if (E.isLeft(result)) {
+      const error = result.left
+      expect(error.message).toBe('malformed input data')
+    }
+  })
 })
