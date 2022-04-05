@@ -12,7 +12,7 @@ import * as DeviceEventRepositoryMongooseImpl from '../context/device/infrastruc
 
 import { UseCase } from '../context/core/domain/UseCase'
 import getDeviceEventEmitter, {
-  DeviceEventEmitter
+  DeviceEvent
 } from '../context/device/domain/DeviceEventEmitter'
 
 export const keys = {
@@ -28,7 +28,7 @@ export const keys = {
   ) as InjectionToken<UseCase<HandleDeviceEventRequest, void>>,
   deviceEventEmitter: Symbol(
     'DeviceEventEmitter'
-  ) as InjectionToken<DeviceEventEmitter>
+  ) as InjectionToken<DeviceEvent>
 }
 
 container.register(keys.logger, {

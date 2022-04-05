@@ -1,7 +1,7 @@
 import { isLeft } from 'fp-ts/lib/Either'
 import { Logger } from 'pino'
 import * as DeviceEvent from '../domain/DeviceEvent'
-import { DeviceEventEmitter } from '../domain/DeviceEventEmitter'
+import * as Emitter from '../domain/DeviceEventEmitter'
 import DeviceEventRepository from '../domain/DeviceEventRepository'
 
 export type HandleDeviceEventRequest = {
@@ -13,7 +13,7 @@ const HandleDeviceEventUseCase =
   (
     deviceEventRepository: DeviceEventRepository,
     logger: Logger,
-    emitter: DeviceEventEmitter
+    emitter: Emitter.DeviceEvent
   ) =>
   async (request?: HandleDeviceEventRequest): Promise<void> => {
     if (request === undefined) {

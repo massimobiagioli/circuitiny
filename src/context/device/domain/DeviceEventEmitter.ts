@@ -17,7 +17,7 @@ export type DeviceEvents = {
   disconnected: (event: DeviceDisconnectedEvent) => void
 }
 
-interface DeviceEvent {
+export interface DeviceEvent {
   on<U extends keyof DeviceEvents>(event: U, listener: DeviceEvents[U]): this
   off<U extends keyof DeviceEvents>(event: U, listener: DeviceEvents[U]): this
   emit<U extends keyof DeviceEvents>(
@@ -51,7 +51,7 @@ export class DeviceEventEmitter implements DeviceEvent {
   }
 }
 
-const getDeviceEventEmitter = (): DeviceEventEmitter => {
+const getDeviceEventEmitter = (): DeviceEvent => {
   const deviceEventEmitter = new DeviceEventEmitter()
 
   deviceEventEmitter.on('connected', (data) =>
