@@ -19,15 +19,15 @@ async function testUseCase(
   const stubDeviceEventRepository: StubbedInstance<DeviceEventRepository> =
     stubInterface<DeviceEventRepository>()
 
-  container.register(deps.KEYS.LOGGER, {
+  container.register(deps.keys.logger, {
     useValue: stubLogger
   })
-  container.register(deps.KEYS.DEVICE_EVENT_REPOSITORY, {
+  container.register(deps.keys.deviceEventRepository, {
     useValue: stubDeviceEventRepository
   })
 
   const useCase = container.resolve<UseCase<HandleDeviceEventRequest, void>>(
-    deps.KEYS.HANDLE_DEVICE_EVENT_USE_CASE
+    deps.keys.handleDeviceEventUseCase
   )
 
   await useCase(request)

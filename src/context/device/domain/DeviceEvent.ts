@@ -2,7 +2,7 @@ import { Static, Type } from '@sinclair/typebox'
 import * as E from 'fp-ts/lib/Either'
 import * as V from '../../core/domain/Validation'
 
-enum DeviceEventType {
+export enum DeviceEventType {
   'connected' = 'connected',
   'disconnected' = 'disconnected'
 }

@@ -4,20 +4,13 @@ import path from 'path'
 import healthRoutes from './routes/health'
 import * as mqtt from 'mqtt'
 import * as deps from './config/deps'
-import { container } from './config/deps'
 import { connect } from 'mongoose'
-import { HandleDeviceEventRequest } from './context/device/application/HandleDeviceEventUseCase'
 import * as O from 'fp-ts/lib/Option'
-import { MqttConf } from './config/mqtt'
-import { MongoConf } from './config/mongo'
-import { ServerConf } from './config/server'
-import { Logger } from 'pino'
-import { UseCase } from './context/core/domain/UseCase'
 
-const logger = container.resolve<Logger>(deps.KEYS.LOGGER)
-const mqttConf = container.resolve<MqttConf>(deps.KEYS.MQTT_CONF)
-const mongoConf = container.resolve<MongoConf>(deps.KEYS.MONGO_CONF)
-const serverConf = container.resolve<ServerConf>(deps.KEYS.SERVER_CONF)
+const logger = deps.container.resolve(deps.keys.logger)
+const mqttConf = deps.container.resolve(deps.keys.mqttConf)
+const mongoConf = deps.container.resolve(deps.keys.mongoConf)
+const serverConf = deps.container.resolve(deps.keys.serverConf)
 
 const initMqtt = () => {
   const mqttClient: mqtt.MqttClient = mqtt.connect(mqttConf.brokerUrl())
@@ -35,9 +28,9 @@ const initMqtt = () => {
 
   mqttClient.on('message', async (topic, message) => {
     const device = topic.split('/')[1]
-    const handleDeviceEventUseCase = container.resolve<
-      UseCase<HandleDeviceEventRequest, void>
-    >(deps.KEYS.HANDLE_DEVICE_EVENT_USE_CASE)
+    const handleDeviceEventUseCase = deps.container.resolve(
+      deps.keys.handleDeviceEventUseCase
+    )
     await handleDeviceEventUseCase({ device, rawEvent: message.toString() })
   })
 }

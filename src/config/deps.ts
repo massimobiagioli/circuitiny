@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { container, DependencyContainer } from 'tsyringe'
+import { container, DependencyContainer, InjectionToken } from 'tsyringe'
 import pino, { Logger } from 'pino'
 import * as mqtt from './mqtt'
 import * as mongo from './mongo'
@@ -11,50 +11,57 @@ import DeviceEventRepository from '../context/device/domain/DeviceEventRepositor
 import * as DeviceEventRepositoryMongooseImpl from '../context/device/infrastructure/mongoose/DeviceEventRepositoryMongooseImpl'
 
 import { UseCase } from '../context/core/domain/UseCase'
+import getDeviceEventEmitter, {
+  DeviceEventEmitter
+} from '../context/device/domain/DeviceEventEmitter'
 
-export enum KEYS {
-  LOGGER = 'LOGGER',
-
-  MQTT_CONF = 'MQTT_CONF',
-  MONGO_CONF = 'MONGO_CONF',
-  SERVER_CONF = 'SERVER_CONF',
-
-  DEVICE_EVENT_REPOSITORY = 'DEVICE_EVENT_REPOSITORY',
-
-  HANDLE_DEVICE_EVENT_USE_CASE = 'HANDLE_DEVICE_EVENT_USE_CASE'
+export const keys = {
+  logger: Symbol('logger') as InjectionToken<Logger>,
+  mqttConf: Symbol('mqttConf') as InjectionToken<mqtt.MqttConf>,
+  mongoConf: Symbol('mongoConf') as InjectionToken<mongo.MongoConf>,
+  serverConf: Symbol('serverConf') as InjectionToken<server.ServerConf>,
+  deviceEventRepository: Symbol(
+    'DeviceEventRepository'
+  ) as InjectionToken<DeviceEventRepository>,
+  handleDeviceEventUseCase: Symbol(
+    'HandleDeviceEventUseCase'
+  ) as InjectionToken<UseCase<HandleDeviceEventRequest, void>>,
+  deviceEventEmitter: Symbol(
+    'DeviceEventEmitter'
+  ) as InjectionToken<DeviceEventEmitter>
 }
 
-container.register<Logger>(KEYS.LOGGER, {
+container.register(keys.logger, {
   useValue: pino({ level: 'info' })
 })
 
-container.register<mqtt.MqttConf>(KEYS.MQTT_CONF, {
+container.register(keys.mqttConf, {
   useValue: mqtt
 })
 
-container.register<mongo.MongoConf>(KEYS.MONGO_CONF, {
+container.register(keys.mongoConf, {
   useValue: mongo
 })
 
-container.register<server.ServerConf>(KEYS.SERVER_CONF, {
+container.register(keys.serverConf, {
   useValue: server
 })
 
-container.register<DeviceEventRepository>(KEYS.DEVICE_EVENT_REPOSITORY, {
+container.register(keys.deviceEventRepository, {
   useFactory: (_) => DeviceEventRepositoryMongooseImpl
 })
 
-container.register<UseCase<HandleDeviceEventRequest, void>>(
-  KEYS.HANDLE_DEVICE_EVENT_USE_CASE,
-  {
-    useFactory: (container: DependencyContainer) => {
-      const deviceEventRepository = container.resolve<DeviceEventRepository>(
-        KEYS.DEVICE_EVENT_REPOSITORY
-      )
-      const logger = container.resolve<Logger>(KEYS.LOGGER)
-      return HandleDeviceEventUseCase(deviceEventRepository, logger)
-    }
+container.register(keys.handleDeviceEventUseCase, {
+  useFactory: (container: DependencyContainer) => {
+    const deviceEventRepository = container.resolve(keys.deviceEventRepository)
+    const logger = container.resolve(keys.logger)
+    const emitter = container.resolve(keys.deviceEventEmitter)
+    return HandleDeviceEventUseCase(deviceEventRepository, logger, emitter)
   }
-)
+})
+
+container.register(keys.deviceEventEmitter, {
+  useValue: getDeviceEventEmitter()
+})
 
 export { container }
