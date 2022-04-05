@@ -16,7 +16,6 @@ import { UseCase } from './context/core/domain/UseCase'
 
 const logger = container.resolve<Logger>(deps.KEYS.LOGGER)
 const mqttConf = container.resolve<MqttConf>(deps.KEYS.MQTT_CONF)
-console.log('mqtt', mqttConf.brokerUrl())
 const mongoConf = container.resolve<MongoConf>(deps.KEYS.MONGO_CONF)
 const serverConf = container.resolve<ServerConf>(deps.KEYS.SERVER_CONF)
 
