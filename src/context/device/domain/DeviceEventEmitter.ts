@@ -66,7 +66,7 @@ const getDeviceEventEmitter = (
 
   deviceEventEmitter.on('connected', async (data) =>
     pipe(
-      Device.fromDeviceEventConnectedEvent(data),
+      Device.fromConnectedEvent(data),
       match(
         (error) => logger.error(error.message),
         async (device) => await deviceRepository.store(device)

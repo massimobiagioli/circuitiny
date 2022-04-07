@@ -15,17 +15,11 @@ export type Device = Static<typeof Device>
 
 const validate = V.compiler.compile(Device)
 
-export const fromDeviceEventConnectedEvent = (
+export const fromConnectedEvent = (
   event: DeviceConnectedEvent
 ): E.Either<Error, Device> => {
-  const device = {
-    id: event.id,
-    model: event.model,
-    address: event.address,
-    sketch: event.sketch
-  }
-  if (validate(device)) {
-    return E.right(device as Device)
+  if (validate(event)) {
+    return E.right(event as Device)
   }
   return E.left(new Error(V.errorString(validate.errors)))
 }
