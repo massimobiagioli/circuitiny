@@ -1,16 +1,17 @@
-import fastify from 'fastify'
+import fastify, { FastifyInstance } from 'fastify'
 import fastifyStatic from 'fastify-static'
 import path from 'path'
-import healthRoutes from './routes/health'
 import * as mqtt from 'mqtt'
 import * as deps from './config/deps'
 import { connect } from 'mongoose'
 import * as O from 'fp-ts/lib/Option'
+import healthController from './context/core/ui/controller/healthController'
 
 const logger = deps.container.resolve(deps.keys.logger)
 const mqttConf = deps.container.resolve(deps.keys.mqttConf)
 const mongoConf = deps.container.resolve(deps.keys.mongoConf)
 const serverConf = deps.container.resolve(deps.keys.serverConf)
+const deviceController = deps.container.resolve(deps.keys.deviceController)
 
 const initMqtt = () => {
   const mqttClient: mqtt.MqttClient = mqtt.connect(mqttConf.brokerUrl())
@@ -51,6 +52,15 @@ const startDbConnection = (): void => {
     })
 }
 
+const registerRoutes = (app: FastifyInstance) => {
+  app.register(fastifyStatic, {
+    root: path.resolve(__dirname, '../client/dist'),
+    prefix: '/'
+  })
+  app.register(healthController, { prefix: '/health' })
+  app.register(deviceController, { prefix: '/device' })
+}
+
 export const boot = () => {
   initMqtt()
   startDbConnection()
@@ -59,11 +69,7 @@ export const boot = () => {
     logger: logger
   })
 
-  app.register(fastifyStatic, {
-    root: path.resolve(__dirname, '../client/dist'),
-    prefix: '/'
-  })
-  app.register(healthRoutes, { prefix: '/health' })
+  registerRoutes(app)
 
   app.listen(serverConf.port(), (err, _address) => {
     if (err) {

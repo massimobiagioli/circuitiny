@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 import * as E from 'fp-ts/lib/Either'
 import * as V from '../../core/domain/Validation'
+import { DispatchableEvents } from './DeviceEventEmitter'
 
 export enum DeviceEventType {
   'connected' = 'connected',
@@ -42,4 +43,25 @@ export const fromString = (raw: string): E.Either<Error, DeviceEvent> => {
     return E.right(data as DeviceEvent)
   }
   return E.left(new Error(V.errorString(validate.errors)))
+}
+
+export const toDispatchableEvent = ({
+  eventType,
+  sender,
+  createdAt
+}: DeviceEvent): DispatchableEvents => {
+  switch (eventType) {
+    case DeviceEventType.connected:
+      return {
+        id: sender.id,
+        model: sender.model,
+        address: sender.address,
+        sketch: sender.sketch,
+        occurredAt: createdAt
+      }
+    case DeviceEventType.disconnected:
+      return {
+        id: sender.id
+      }
+  }
 }

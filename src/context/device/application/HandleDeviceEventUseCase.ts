@@ -1,4 +1,5 @@
-import { isLeft } from 'fp-ts/lib/Either'
+import { match } from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/function'
 import { Logger } from 'pino'
 import * as DeviceEvent from '../domain/DeviceEvent'
 import * as Emitter from '../domain/DeviceEventEmitter'
@@ -22,35 +23,27 @@ const HandleDeviceEventUseCase =
     }
 
     const event = DeviceEvent.fromString(request.rawEvent)
-    if (isLeft(event)) {
-      logger.error(event.left.message)
-      return
-    }
+    pipe(
+      event,
+      match(
+        (error) => logger.error(error.message),
 
-    const eventData = event.right
-    logger.info(
-      `event received: ${eventData.eventType.toString()} - device: ${
-        request.device
-      }`
+        async (eventData) => {
+          logger.info(
+            `event received: ${eventData.eventType.toString()} - device: ${
+              request.device
+            }`
+          )
+
+          await deviceEventRepository.store(eventData)
+
+          emitter.emit(
+            eventData.eventType,
+            DeviceEvent.toDispatchableEvent(eventData)
+          )
+        }
+      )
     )
-
-    await deviceEventRepository.store(eventData)
-
-    if (eventData.eventType === DeviceEvent.DeviceEventType.connected) {
-      emitter.emit('connected', {
-        id: eventData.sender.id,
-        model: eventData.sender.model,
-        address: eventData.sender.address,
-        sketch: eventData.sender.sketch,
-        occurredAt: eventData.createdAt
-      })
-    }
-
-    if (eventData.eventType === DeviceEvent.DeviceEventType.disconnected) {
-      emitter.emit('disconnected', {
-        id: eventData.sender.id
-      })
-    }
   }
 
 export default HandleDeviceEventUseCase

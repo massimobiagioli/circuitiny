@@ -1,4 +1,9 @@
 import EventEmitter from 'events'
+import { match } from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/function'
+import { Logger } from 'pino'
+import * as Device from './Device'
+import DeviceRepository from './DeviceRepository'
 
 export interface DeviceConnectedEvent {
   id: string
@@ -11,6 +16,8 @@ export interface DeviceConnectedEvent {
 export interface DeviceDisconnectedEvent {
   id: string
 }
+
+export type DispatchableEvents = DeviceConnectedEvent | DeviceDisconnectedEvent
 
 export type DeviceEvents = {
   connected: (event: DeviceConnectedEvent) => void
@@ -29,7 +36,7 @@ export interface DeviceEvent {
 export class DeviceEventEmitter implements DeviceEvent {
   emitter: EventEmitter
 
-  constructor() {
+  constructor(private readonly deviceRepository: DeviceRepository) {
     this.emitter = new EventEmitter()
   }
 
@@ -51,21 +58,25 @@ export class DeviceEventEmitter implements DeviceEvent {
   }
 }
 
-const getDeviceEventEmitter = (): DeviceEvent => {
-  const deviceEventEmitter = new DeviceEventEmitter()
+const getDeviceEventEmitter = (
+  deviceRepository: DeviceRepository,
+  logger: Logger
+): DeviceEvent => {
+  const deviceEventEmitter = new DeviceEventEmitter(deviceRepository)
 
-  deviceEventEmitter.on('connected', (data) =>
-    console.log(
-      'device is connected - TODO: handle it!!!',
-      JSON.stringify(data)
+  deviceEventEmitter.on('connected', async (data) =>
+    pipe(
+      Device.fromDeviceEventConnectedEvent(data),
+      match(
+        (error) => logger.error(error.message),
+        async (device) => await deviceRepository.store(device)
+      )
     )
   )
 
-  deviceEventEmitter.on('disconnected', (data) =>
-    console.log(
-      'device is disconnected - TODO: handle it!!!',
-      JSON.stringify(data)
-    )
+  deviceEventEmitter.on(
+    'disconnected',
+    async (data) => await deviceRepository.remove(data.id)
   )
 
   return deviceEventEmitter

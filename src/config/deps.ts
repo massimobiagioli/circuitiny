@@ -9,11 +9,15 @@ import HandleDeviceEventUseCase, {
 } from '../context/device/application/HandleDeviceEventUseCase'
 import DeviceEventRepository from '../context/device/domain/DeviceEventRepository'
 import * as DeviceEventRepositoryMongooseImpl from '../context/device/infrastructure/mongoose/DeviceEventRepositoryMongooseImpl'
+import * as DeviceRepositoryMongooseImpl from '../context/device/infrastructure/mongoose/DeviceRepositoryMongooseImpl'
 
 import { UseCase } from '../context/core/domain/UseCase'
 import getDeviceEventEmitter, {
   DeviceEvent
 } from '../context/device/domain/DeviceEventEmitter'
+import DeviceRepository from '../context/device/domain/DeviceRepository'
+import { FastifyPluginAsync } from 'fastify'
+import getDeviceController from '../context/device/ui/controller/deviceController'
 
 export const keys = {
   logger: Symbol('logger') as InjectionToken<Logger>,
@@ -23,12 +27,18 @@ export const keys = {
   deviceEventRepository: Symbol(
     'DeviceEventRepository'
   ) as InjectionToken<DeviceEventRepository>,
+  deviceRepository: Symbol(
+    'DeviceRepository'
+  ) as InjectionToken<DeviceRepository>,
   handleDeviceEventUseCase: Symbol(
     'HandleDeviceEventUseCase'
   ) as InjectionToken<UseCase<HandleDeviceEventRequest, void>>,
   deviceEventEmitter: Symbol(
     'DeviceEventEmitter'
-  ) as InjectionToken<DeviceEvent>
+  ) as InjectionToken<DeviceEvent>,
+  deviceController: Symbol(
+    'DeviceController'
+  ) as InjectionToken<FastifyPluginAsync>
 }
 
 container.register(keys.logger, {
@@ -51,6 +61,10 @@ container.register(keys.deviceEventRepository, {
   useFactory: (_) => DeviceEventRepositoryMongooseImpl
 })
 
+container.register(keys.deviceRepository, {
+  useFactory: (_) => DeviceRepositoryMongooseImpl
+})
+
 container.register(keys.handleDeviceEventUseCase, {
   useFactory: (container: DependencyContainer) => {
     const deviceEventRepository = container.resolve(keys.deviceEventRepository)
@@ -61,7 +75,18 @@ container.register(keys.handleDeviceEventUseCase, {
 })
 
 container.register(keys.deviceEventEmitter, {
-  useValue: getDeviceEventEmitter()
+  useFactory: (container: DependencyContainer) => {
+    const deviceRepository = container.resolve(keys.deviceRepository)
+    const logger = container.resolve(keys.logger)
+    return getDeviceEventEmitter(deviceRepository, logger)
+  }
+})
+
+container.register(keys.deviceController, {
+  useFactory: (container: DependencyContainer) => {
+    const deviceRepository = container.resolve(keys.deviceRepository)
+    return getDeviceController(deviceRepository)
+  }
 })
 
 export { container }

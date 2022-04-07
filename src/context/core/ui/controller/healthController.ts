@@ -4,13 +4,11 @@ import {
   FastifyPluginOptions
 } from 'fastify'
 
-const HealthRoute: FastifyPluginAsync = async (
+const healthController: FastifyPluginAsync = async (
   server: FastifyInstance,
   _options: FastifyPluginOptions
 ) => {
-  server.get('/', async (_request, _reply) => {
-    return 'health ok!'
-  })
+  server.get('/', async (_request, _reply) => 'health ok!')
 }
 
-export default HealthRoute
+export default healthController
