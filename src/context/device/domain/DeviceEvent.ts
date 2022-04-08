@@ -3,13 +3,11 @@ import * as E from 'fp-ts/lib/Either'
 import * as V from '../../core/domain/Validation'
 import { DispatchableEvents } from './DeviceEventEmitter'
 
-export enum DeviceEventType {
-  'connected' = 'connected',
-  'disconnected' = 'disconnected'
-}
-
 export const DeviceEvent = Type.Object({
-  eventType: Type.Enum(DeviceEventType),
+  eventType: Type.Union([
+    Type.Literal('connected'),
+    Type.Literal('disconnected')
+  ]),
   sender: Type.Object({
     id: Type.String(),
     model: Type.String(),
@@ -51,7 +49,7 @@ export const toDispatchableEvent = ({
   createdAt
 }: DeviceEvent): DispatchableEvents => {
   switch (eventType) {
-    case DeviceEventType.connected:
+    case 'connected':
       return {
         id: sender.id,
         model: sender.model,
@@ -59,7 +57,7 @@ export const toDispatchableEvent = ({
         sketch: sender.sketch,
         occurredAt: createdAt
       }
-    case DeviceEventType.disconnected:
+    case 'disconnected':
       return {
         id: sender.id
       }

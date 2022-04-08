@@ -1,6 +1,5 @@
 import * as E from 'fp-ts/lib/Either'
 import * as DeviceEvent from '../../../../../src/context/device/domain/DeviceEvent'
-import { DeviceEventType } from '../../../../../src/context/device/domain/DeviceEvent'
 import {
   DeviceConnectedEvent,
   DeviceDisconnectedEvent
@@ -57,7 +56,7 @@ describe('DeviceEvent', () => {
 
   it('should create a dispatchable DeviceConnectedEvent', () => {
     const deviceEvent = {
-      eventType: DeviceEventType.connected,
+      eventType: 'connected' as const,
       sender: {
         id: '123',
         model: 'ESP8266',
@@ -78,7 +77,7 @@ describe('DeviceEvent', () => {
 
   it('should create a dispatchable DeviceDisconnectedEvent', () => {
     const deviceEvent = {
-      eventType: DeviceEventType.disconnected,
+      eventType: 'disconnected' as const,
       sender: {
         id: '123',
         model: 'ESP8266',
