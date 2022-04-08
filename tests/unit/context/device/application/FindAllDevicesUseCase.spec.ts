@@ -5,6 +5,7 @@ import { StubbedInstance, stubInterface } from 'ts-sinon'
 import { Logger } from 'pino'
 import { Device } from '../../../../../src/context/device/domain/Device'
 import DeviceRepository from '../../../../../src/context/device/domain/DeviceRepository'
+import { FAKE_DEVICES } from '../../../../helper/Device'
 
 type UseCaseOptions = {
   devices: Device[]
@@ -39,22 +40,7 @@ describe('DeviceEventUseCase', () => {
   })
 
   it('should return a list of devices', async () => {
-    const fakeDevices: Device[] = [
-      {
-        id: '1',
-        model: 'device1',
-        address: '10.10.10.1',
-        sketch: 'test sketch 1'
-      },
-      {
-        id: '2',
-        model: 'device2',
-        address: '10.10.10.2',
-        sketch: 'test sketch 2'
-      }
-    ]
-
-    const devices = await testUseCase({ devices: fakeDevices })
+    const devices = await testUseCase({ devices: FAKE_DEVICES })
 
     expect(devices).toHaveLength(2)
     expect(devices[0].id).toBe('1')
