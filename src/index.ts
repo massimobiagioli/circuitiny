@@ -1,4 +1,5 @@
 import 'dotenv/config'
-import { boot } from './app'
+import { pipe } from 'fp-ts/lib/function'
+import * as App from './app'
 
-boot()
+pipe(App.create(), App.start)

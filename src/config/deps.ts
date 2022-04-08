@@ -17,7 +17,7 @@ import getDeviceEventEmitter, {
 } from '../context/device/domain/DeviceEventEmitter'
 import DeviceRepository from '../context/device/domain/DeviceRepository'
 import { FastifyPluginAsync } from 'fastify'
-import getDeviceController from '../context/device/ui/controller/deviceController'
+import getDeviceController from '../context/device/ui/controller/DeviceController'
 import StoreDeviceUseCase, {
   StoreDeviceRequest
 } from '../context/device/application/StoreDeviceUseCase'

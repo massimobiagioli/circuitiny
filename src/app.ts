@@ -61,7 +61,7 @@ const registerRoutes = (app: FastifyInstance) => {
   app.register(deviceController, { prefix: '/api/device' })
 }
 
-export const boot = () => {
+export const create = (): FastifyInstance => {
   initMqtt()
   startDbConnection()
 
@@ -71,6 +71,10 @@ export const boot = () => {
 
   registerRoutes(app)
 
+  return app
+}
+
+export const start = (app: FastifyInstance) => {
   app.listen(serverConf.port(), (err, _address) => {
     if (err) {
       app.log.error(err)
