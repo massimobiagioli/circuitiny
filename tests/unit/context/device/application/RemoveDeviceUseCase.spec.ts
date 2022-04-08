@@ -1,6 +1,4 @@
 import * as deps from '../../../../../src/config/deps'
-import { container } from '../../../../../src/config/deps'
-import { UseCase } from '../../../../../src/context/core/domain/UseCase'
 import { StubbedInstance, stubInterface } from 'ts-sinon'
 import { Logger } from 'pino'
 import DeviceRepository from '../../../../../src/context/device/domain/DeviceRepository'
@@ -18,16 +16,14 @@ async function testUseCase(
   const stubDeviceRepository: StubbedInstance<DeviceRepository> =
     stubInterface<DeviceRepository>()
 
-  container.register(deps.keys.logger, {
+  deps.container.register(deps.keys.logger, {
     useValue: stubLogger
   })
-  container.register(deps.keys.deviceRepository, {
+  deps.container.register(deps.keys.deviceRepository, {
     useValue: stubDeviceRepository
   })
 
-  const useCase = container.resolve<UseCase<RemoveDeviceRequest, void>>(
-    deps.keys.removeDeviceUseCase
-  )
+  const useCase = deps.container.resolve(deps.keys.removeDeviceUseCase)
 
   await useCase(request)
 
@@ -37,7 +33,7 @@ async function testUseCase(
   }
 }
 
-describe('DeviceEventUseCase', () => {
+describe('RemoveDeviceUseCase', () => {
   it('should store device', async () => {
     const { deviceRepository } = await testUseCase({
       deviceId: '1'

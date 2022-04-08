@@ -37,7 +37,7 @@ async function testUseCase(
   }
 }
 
-describe('DeviceEventUseCase', () => {
+describe('StoreDeviceUseCase', () => {
   it('should store device', async () => {
     const { deviceRepository } = await testUseCase({
       device: {

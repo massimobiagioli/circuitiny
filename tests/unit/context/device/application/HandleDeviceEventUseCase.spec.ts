@@ -1,6 +1,4 @@
 import * as deps from '../../../../../src/config/deps'
-import { container } from '../../../../../src/config/deps'
-import { UseCase } from '../../../../../src/context/core/domain/UseCase'
 import { HandleDeviceEventRequest } from '../../../../../src/context/device/application/HandleDeviceEventUseCase'
 import { DEVICES, RAW_MESSAGES } from '../../../../helper/Device'
 import { StubbedInstance, stubInterface } from 'ts-sinon'
@@ -19,16 +17,14 @@ async function testUseCase(
   const stubDeviceEventRepository: StubbedInstance<DeviceEventRepository> =
     stubInterface<DeviceEventRepository>()
 
-  container.register(deps.keys.logger, {
+  deps.container.register(deps.keys.logger, {
     useValue: stubLogger
   })
-  container.register(deps.keys.deviceEventRepository, {
+  deps.container.register(deps.keys.deviceEventRepository, {
     useValue: stubDeviceEventRepository
   })
 
-  const useCase = container.resolve<UseCase<HandleDeviceEventRequest, void>>(
-    deps.keys.handleDeviceEventUseCase
-  )
+  const useCase = deps.container.resolve(deps.keys.handleDeviceEventUseCase)
 
   await useCase(request)
 
@@ -65,7 +61,7 @@ describe('DeviceEventUseCase', () => {
   })
 
   it('should discard an event with validation error', async () => {
-    const eventWithValidationError = `{"sender": {"id": "esp8266-01", "sketch": "dummy", "model": "ESP8266", "address": "asdf"}, "createdAt": 702293518, "eventType": "connected"}`
+    const eventWithValidationError = RAW_MESSAGES.WITH_VALIDATION_ERROR
     const { logger, deviceEventRepository } = await testUseCase({
       device: DEVICES.ESP8266_01,
       rawEvent: eventWithValidationError

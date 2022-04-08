@@ -1,6 +1,4 @@
 import * as deps from '../../../../../src/config/deps'
-import { container } from '../../../../../src/config/deps'
-import { UseCase } from '../../../../../src/context/core/domain/UseCase'
 import { StubbedInstance, stubInterface } from 'ts-sinon'
 import { Logger } from 'pino'
 import { Device } from '../../../../../src/context/device/domain/Device'
@@ -18,21 +16,19 @@ async function testUseCase(options: UseCaseOptions): Promise<Device[]> {
 
   stubDeviceRepository.findAll.resolves(options.devices)
 
-  container.register(deps.keys.logger, {
+  deps.container.register(deps.keys.logger, {
     useValue: stubLogger
   })
-  container.register(deps.keys.deviceRepository, {
+  deps.container.register(deps.keys.deviceRepository, {
     useValue: stubDeviceRepository
   })
 
-  const useCase = container.resolve<UseCase<never, Promise<Device[]>>>(
-    deps.keys.findAllDevicesUseCase
-  )
+  const useCase = deps.container.resolve(deps.keys.findAllDevicesUseCase)
 
   return await useCase()
 }
 
-describe('DeviceEventUseCase', () => {
+describe('FindAllDevicesUseCase', () => {
   it('should return empty list', async () => {
     const devices = await testUseCase({ devices: [] })
 
