@@ -2,8 +2,10 @@ import EventEmitter from 'events'
 import { match } from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/function'
 import { Logger } from 'pino'
+import { UseCase } from '../../core/domain/UseCase'
+import { RemoveDeviceRequest } from '../application/RemoveDeviceUseCase'
+import { StoreDeviceRequest } from '../application/StoreDeviceUseCase'
 import * as Device from './Device'
-import DeviceRepository from './DeviceRepository'
 
 export interface DeviceConnectedEvent {
   id: string
@@ -36,7 +38,7 @@ export interface DeviceEvent {
 export class DeviceEventEmitter implements DeviceEvent {
   emitter: EventEmitter
 
-  constructor(private readonly deviceRepository: DeviceRepository) {
+  constructor() {
     this.emitter = new EventEmitter()
   }
 
@@ -59,24 +61,25 @@ export class DeviceEventEmitter implements DeviceEvent {
 }
 
 const getDeviceEventEmitter = (
-  deviceRepository: DeviceRepository,
+  storeDeviceUseCase: UseCase<StoreDeviceRequest, void>,
+  removeDeviceUseCase: UseCase<RemoveDeviceRequest, void>,
   logger: Logger
 ): DeviceEvent => {
-  const deviceEventEmitter = new DeviceEventEmitter(deviceRepository)
+  const deviceEventEmitter = new DeviceEventEmitter()
 
   deviceEventEmitter.on('connected', async (data) =>
     pipe(
       Device.fromConnectedEvent(data),
       match(
         (error) => logger.error(error.message),
-        async (device) => await deviceRepository.store(device)
+        async (device) => await storeDeviceUseCase({ device })
       )
     )
   )
 
   deviceEventEmitter.on(
     'disconnected',
-    async (data) => await deviceRepository.remove(data.id)
+    async (data) => await removeDeviceUseCase({ deviceId: data.id })
   )
 
   return deviceEventEmitter

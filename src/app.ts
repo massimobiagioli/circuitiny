@@ -58,7 +58,7 @@ const registerRoutes = (app: FastifyInstance) => {
     prefix: '/'
   })
   app.register(healthController, { prefix: '/health' })
-  app.register(deviceController, { prefix: '/device' })
+  app.register(deviceController, { prefix: '/api/device' })
 }
 
 export const boot = () => {

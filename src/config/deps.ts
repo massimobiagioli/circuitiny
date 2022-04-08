@@ -18,6 +18,14 @@ import getDeviceEventEmitter, {
 import DeviceRepository from '../context/device/domain/DeviceRepository'
 import { FastifyPluginAsync } from 'fastify'
 import getDeviceController from '../context/device/ui/controller/deviceController'
+import StoreDeviceUseCase, {
+  StoreDeviceRequest
+} from '../context/device/application/StoreDeviceUseCase'
+import RemoveDeviceUseCase, {
+  RemoveDeviceRequest
+} from '../context/device/application/RemoveDeviceUseCase'
+import { Device } from '../context/device/domain/Device'
+import FindAllDevicesEventUseCase from '../context/device/application/FindAllDevicesUseCase'
 
 export const keys = {
   logger: Symbol('logger') as InjectionToken<Logger>,
@@ -33,6 +41,15 @@ export const keys = {
   handleDeviceEventUseCase: Symbol(
     'HandleDeviceEventUseCase'
   ) as InjectionToken<UseCase<HandleDeviceEventRequest, void>>,
+  storeDeviceUseCase: Symbol('StoreDeviceUseCase') as InjectionToken<
+    UseCase<StoreDeviceRequest, void>
+  >,
+  removeDeviceUseCase: Symbol('RemoveDeviceUseCase') as InjectionToken<
+    UseCase<RemoveDeviceRequest, void>
+  >,
+  findAllDevicesUseCase: Symbol('FindAllDevicesUseCase') as InjectionToken<
+    UseCase<never, Promise<Device[]>>
+  >,
   deviceEventEmitter: Symbol(
     'DeviceEventEmitter'
   ) as InjectionToken<DeviceEvent>,
@@ -74,18 +91,46 @@ container.register(keys.handleDeviceEventUseCase, {
   }
 })
 
-container.register(keys.deviceEventEmitter, {
+container.register(keys.storeDeviceUseCase, {
   useFactory: (container: DependencyContainer) => {
     const deviceRepository = container.resolve(keys.deviceRepository)
     const logger = container.resolve(keys.logger)
-    return getDeviceEventEmitter(deviceRepository, logger)
+    return StoreDeviceUseCase(deviceRepository, logger)
+  }
+})
+
+container.register(keys.removeDeviceUseCase, {
+  useFactory: (container: DependencyContainer) => {
+    const deviceRepository = container.resolve(keys.deviceRepository)
+    const logger = container.resolve(keys.logger)
+    return RemoveDeviceUseCase(deviceRepository, logger)
+  }
+})
+
+container.register(keys.findAllDevicesUseCase, {
+  useFactory: (container: DependencyContainer) => {
+    const deviceRepository = container.resolve(keys.deviceRepository)
+    return FindAllDevicesEventUseCase(deviceRepository)
+  }
+})
+
+container.register(keys.deviceEventEmitter, {
+  useFactory: (container: DependencyContainer) => {
+    const storeDeviceUseCase = container.resolve(keys.storeDeviceUseCase)
+    const removeDeviceUseCase = container.resolve(keys.removeDeviceUseCase)
+    const logger = container.resolve(keys.logger)
+    return getDeviceEventEmitter(
+      storeDeviceUseCase,
+      removeDeviceUseCase,
+      logger
+    )
   }
 })
 
 container.register(keys.deviceController, {
   useFactory: (container: DependencyContainer) => {
-    const deviceRepository = container.resolve(keys.deviceRepository)
-    return getDeviceController(deviceRepository)
+    const findAllDevicesUseCase = container.resolve(keys.findAllDevicesUseCase)
+    return getDeviceController(findAllDevicesUseCase)
   }
 })
 

@@ -3,12 +3,15 @@ import {
   FastifyPluginAsync,
   FastifyPluginOptions
 } from 'fastify'
-import DeviceRepository from '../../domain/DeviceRepository'
+import { UseCase } from '../../../core/domain/UseCase'
+import { Device } from '../../domain/Device'
 
 const getDeviceController =
-  (deviceRepository: DeviceRepository): FastifyPluginAsync =>
+  (
+    findAllDevicesUseCase: UseCase<never, Promise<Device[]>>
+  ): FastifyPluginAsync =>
   async (server: FastifyInstance, _options: FastifyPluginOptions) => {
-    server.get('/', async (_request, _reply) => deviceRepository.findAll())
+    server.get('/', async (_request, _reply) => findAllDevicesUseCase())
   }
 
 export default getDeviceController
