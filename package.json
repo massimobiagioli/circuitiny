@@ -25,6 +25,7 @@
     "fastify": "^3.27.4",
     "fastify-static": "^4.6.1",
     "fp-ts": "^2.11.9",
+    "mongodb-memory-server": "^8.4.2",
     "mongoose": "^6.2.9",
     "mqtt": "^4.3.7",
     "pino": "^7.9.2",

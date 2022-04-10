@@ -62,9 +62,6 @@ const registerRoutes = (app: FastifyInstance) => {
 }
 
 export const create = (): FastifyInstance => {
-  initMqtt()
-  startDbConnection()
-
   const app = fastify({
     logger: logger
   })
@@ -75,6 +72,9 @@ export const create = (): FastifyInstance => {
 }
 
 export const start = (app: FastifyInstance) => {
+  initMqtt()
+  startDbConnection()
+
   app.listen(serverConf.port(), (err, _address) => {
     if (err) {
       app.log.error(err)
