@@ -4,6 +4,7 @@ import { DEVICES, RAW_MESSAGES } from '../../../../helper/Device'
 import { StubbedInstance, stubInterface } from 'ts-sinon'
 import { Logger } from 'pino'
 import DeviceEventRepository from '../../../../../src/context/device/domain/DeviceEventRepository'
+import DeviceRepository from '../../../../../src/context/device/domain/DeviceRepository'
 
 type InvokeUseCaseResult = {
   logger: StubbedInstance<Logger>
@@ -16,12 +17,17 @@ async function testUseCase(
   const stubLogger: StubbedInstance<Logger> = stubInterface<Logger>()
   const stubDeviceEventRepository: StubbedInstance<DeviceEventRepository> =
     stubInterface<DeviceEventRepository>()
+  const stubDeviceRepository: StubbedInstance<DeviceRepository> =
+    stubInterface<DeviceRepository>()
 
   deps.container.register(deps.keys.logger, {
     useValue: stubLogger
   })
   deps.container.register(deps.keys.deviceEventRepository, {
     useValue: stubDeviceEventRepository
+  })
+  deps.container.register(deps.keys.deviceRepository, {
+    useValue: stubDeviceRepository
   })
 
   const useCase = deps.container.resolve(deps.keys.handleDeviceEventUseCase)
