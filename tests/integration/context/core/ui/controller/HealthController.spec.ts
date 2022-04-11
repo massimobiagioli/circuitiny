@@ -16,13 +16,13 @@ describe('DeviceController', () => {
     await mongoServer.stop()
   })
 
-  it('should find all devices', async () => {
+  it('should check for health', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api/device'
+      url: '/health'
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.body).toBe('[]')
+    expect(response.body).toBe('health ok!')
   })
 })

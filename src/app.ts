@@ -5,7 +5,7 @@ import * as mqtt from 'mqtt'
 import * as deps from './config/deps'
 import { connect } from 'mongoose'
 import * as O from 'fp-ts/lib/Option'
-import healthController from './context/core/ui/controller/healthController'
+import healthController from './context/core/ui/controller/HealthController'
 
 const logger = deps.container.resolve(deps.keys.logger)
 const mqttConf = deps.container.resolve(deps.keys.mqttConf)
