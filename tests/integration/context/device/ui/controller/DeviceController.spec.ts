@@ -1,3 +1,4 @@
+import devices from '../../../../../fixtures/devices'
 import app, { up, down } from '../../../../../helper/AppContext'
 
 describe('DeviceController', () => {
@@ -16,6 +17,6 @@ describe('DeviceController', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.body).toBe('[]')
+    expect(response.body).toBe(JSON.stringify(devices))
   })
 })
